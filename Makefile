@@ -142,3 +142,28 @@ help:
 	@echo "  ps             - Show running containers (main)"
 	@echo "  ps-older       - Show running containers (older)"
 	@echo "  help           - Show this help message"
+
+# Debug and troubleshooting
+.PHONY: debug-enketo
+debug-enketo:
+	@echo "=== Enketo Service Status ==="
+	docker exec central-enketo-1 curl -I http://service:8383/health || echo "Cannot reach backend service"
+	@echo "\n=== Enketo Environment ==="
+	docker exec central-enketo-1 env | grep -E "(DOMAIN|SERVER|URL|LINKED)"
+	@echo "\n=== Enketo Configuration ==="
+	docker exec central-enketo-1 cat config/config.json | head -20
+
+.PHONY: debug-network
+debug-network:
+	@echo "=== Network Connectivity ==="
+	docker exec central-service-1 curl -I http://enketo:8005 || echo "Cannot reach Enketo from service"
+	docker exec central-enketo-1 curl -I http://service:8383 || echo "Cannot reach service from Enketo"
+	@echo "\n=== Docker Network ==="
+	docker network ls | grep central
+
+.PHONY: debug-logs
+debug-logs:
+	@echo "=== Recent Enketo Logs ==="
+	docker logs central-enketo-1 --tail 50
+	@echo "\n=== Recent Service Logs ==="
+	docker logs central-service-1 --tail 50 | grep -i enketo
