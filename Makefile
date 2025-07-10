@@ -75,6 +75,31 @@ restore-backup:
 	fi; \
 	$(docker-compose-main) exec service node /usr/odk/lib/bin/restore.js "$$BACKUP_FILE" "$$SECRET_PASS"
 
+# Database management
+.PHONY: db-migrate
+db-migrate:
+	$(docker-compose-main) exec service node lib/bin/run-migrations.js
+
+.PHONY: db-migrate-older
+db-migrate-older:
+	$(docker-compose-older) exec service node lib/bin/run-migrations.js
+
+.PHONY: db-reset
+db-reset:
+	@echo "Warning: This will reset the database and lose all data!"
+	@read -p "Are you sure? (y/N): " confirm && [ "$$confirm" = "y" ] || exit 1
+	$(docker-compose-main) down
+	docker volume rm -f central_postgres14 2>/dev/null || true
+	$(docker-compose-main) up -d
+
+.PHONY: db-reset-older
+db-reset-older:
+	@echo "Warning: This will reset the older database and lose all data!"
+	@read -p "Are you sure? (y/N): " confirm && [ "$$confirm" = "y" ] || exit 1
+	$(docker-compose-older) down
+	docker volume rm -f central_postgres14 2>/dev/null || true
+	$(docker-compose-older) up -d
+
 # Utility commands
 .PHONY: logs
 logs:
@@ -106,6 +131,11 @@ help:
 	@echo "  stop-older     - Stop older compose stack"
 	@echo "  prune-volumes  - Remove unused Docker volumes"
 	@echo "  prune-all      - Remove all unused Docker resources"
+	@echo "  prune-all-volumes - Remove all volumes (anonymous and named)"
+	@echo "  db-migrate     - Run database migrations for main stack"
+	@echo "  db-migrate-older - Run database migrations for older stack"
+	@echo "  db-reset       - Reset database (WARNING: loses all data)"
+	@echo "  db-reset-older - Reset older database (WARNING: loses all data)"
 	@echo "  restore-backup - Restore ODK Central backup"
 	@echo "  logs           - Show logs for main stack"
 	@echo "  logs-older     - Show logs for older stack"
