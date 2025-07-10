@@ -146,7 +146,7 @@ services:
     image: redis:6.2.14-alpine  # Older Redis version
     volumes:
       - ./files/enketo/redis-enketo-main.conf:/usr/local/etc/redis/redis.conf:ro
-      - enketo_redis_main:/data
+      - enketo_redis_main_older:/data  # Use different volume to avoid version conflicts
     command:
       - redis-server
       - /usr/local/etc/redis/redis.conf
@@ -155,7 +155,7 @@ services:
     image: redis:6.2.14-alpine  # Older Redis version
     volumes:
       - ./files/enketo/redis-enketo-cache.conf:/usr/local/etc/redis/redis.conf:ro
-      - enketo_redis_cache:/data
+      - enketo_redis_cache_older:/data  # Use different volume to avoid version conflicts
     command:
       - redis-server
       - /usr/local/etc/redis/redis.conf
@@ -164,5 +164,5 @@ volumes:
   secrets:
   transfer:
   postgres14:
-  enketo_redis_main:
-  enketo_redis_cache:
+  enketo_redis_main_older:  # Separate volume for older Redis
+  enketo_redis_cache_older:  # Separate volume for older Redis
