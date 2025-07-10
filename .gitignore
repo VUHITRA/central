@@ -5,6 +5,12 @@
 /docker-compose.override.yml
 /version.txt
 
+# JetBrains IDE files
+.idea/
+*.iml
+*.ipr
+*.iws
+
 /files/allow-postgres14-upgrade
 /files/postgres14/upgrade/*
 !/files/postgres14/upgrade/check-available-space
