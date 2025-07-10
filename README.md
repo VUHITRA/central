@@ -48,3 +48,9 @@ We aim to use the latest [active LTS version of Node.js](https://github.com/node
 ## License
 
 All of ODK Central is licensed under the [Apache 2.0](https://raw.githubusercontent.com/getodk/central/master/LICENSE) License.
+
+## SSL Keys for Testing
+
+The SSL keys provided in `files/local/customssl/` (such as `privkey.pem` and `fullchain.pem`) are included solely for test and development purposes. **Do not use these keys in production.**
+
+For any real deployment, you must generate your own SSL certificates and private keys to ensure the security of your installation.
