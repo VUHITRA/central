@@ -1,0 +1,11 @@
+# PostgreSQL 14 Upgrade Authorization
+# This file authorizes the upgrade from PostgreSQL 9.6 to PostgreSQL 14
+# Created on: $(date)
+#
+# WARNING: This upgrade process will modify your database structure.
+# Ensure you have proper backups before proceeding.
+#
+# The presence of this file indicates that the system administrator
+# has reviewed and approved the PostgreSQL upgrade process.
+
+UPGRADE_AUTHORIZED=true
