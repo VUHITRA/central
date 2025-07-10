@@ -1,6 +1,8 @@
 services:
   postgres14:
-    image: 192.168.31.28:5555/central-postgres14:latest
+    build:
+      context: .
+      dockerfile: postgres14.dockerfile
     volumes:
       - postgres14:/var/lib/odk/postgresql/14
     environment:
@@ -9,7 +11,11 @@ services:
       POSTGRES_DB: odk
     restart: always
   postgres:
-    image: 192.168.31.28:5555/central-postgres:latest
+    # This service upgrades from postgres 9.6 to 14.
+    # The legacy name must be maintained to allow access to the anonymous volume.
+    build:
+      context: .
+      dockerfile: postgres-upgrade.dockerfile
     volumes:
       - /var/lib/postgresql/data
       - postgres14:/var/lib/postgresql/14
@@ -19,9 +25,8 @@ services:
       POSTGRES_INITDB_ARGS: -U odk
       POSTGRES_PASSWORD: odk
       POSTGRES_DB: odk
-    restart: always
   mail:
-    image: 192.168.31.28:5555/ixdotai/smtp:v0.5.4
+    image: "ixdotai/smtp:v0.5.4"
     volumes:
       - ./files/mail/rsa.private:/etc/exim4/dkim.key.temp:ro
     environment:
@@ -29,7 +34,9 @@ services:
       - DKIM_KEY_PATH=/etc/exim4/dkim.key.temp
     restart: always
   service:
-    image: 192.168.31.28:5555/central-service:latest
+    build:
+      context: .
+      dockerfile: service.dockerfile
     depends_on:
       - secrets
       - postgres14
@@ -73,7 +80,9 @@ services:
     logging:
       driver: local
   nginx:
-    image: 192.168.31.28:5555/central-nginx:latest
+    build:
+      context: .
+      dockerfile: nginx.dockerfile
     depends_on:
       - service
       - enketo
@@ -100,16 +109,21 @@ services:
       options:
         max-file: "30"
   pyxform:
-    image: 192.168.31.28:5555/ghcr.io/getodk/pyxform-http:v3.1.0
+    image: 192.168.31.28:5555/pyxform-http:v3.1.0
     restart: always
   secrets:
-    image: 192.168.31.28:5555/central-secrets:latest
-    command: './generate-secrets.sh'
     volumes:
       - secrets:/etc/secrets
-    restart: "no"
+    build:
+      context: .
+      dockerfile: secrets.dockerfile
+    command: './generate-secrets.sh'
   enketo:
-    image: 192.168.31.28:5555/central-enketo:latest
+    volumes:
+      - secrets:/etc/secrets
+    build:
+      context: .
+      dockerfile: enketo.dockerfile
     restart: always
     depends_on:
       - secrets
@@ -125,7 +139,7 @@ services:
     extra_hosts:
       - "central.local:172.18.0.8"
   enketo_redis_main:
-    image: 192.168.31.28:5555/redis:7.4.2
+    image: redis:7.4.2
     volumes:
       - ./files/enketo/redis-enketo-main.conf:/usr/local/etc/redis/redis.conf:ro
       - enketo_redis_main:/data
@@ -134,7 +148,7 @@ services:
       - /usr/local/etc/redis/redis.conf
     restart: always
   enketo_redis_cache:
-    image: 192.168.31.28:5555/redis:7.4.2
+    image: redis:7.4.2
     volumes:
       - ./files/enketo/redis-enketo-cache.conf:/usr/local/etc/redis/redis.conf:ro
       - enketo_redis_cache:/data
