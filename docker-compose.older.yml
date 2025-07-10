@@ -34,8 +34,10 @@ services:
       - DKIM_KEY_PATH=/etc/exim4/dkim.key.temp
     restart: always
   service:
-    # Use an older version of ODK Central for testing
-    image: "getodk/central-backend:v2024.1.0"  # Changed from build to specific older version
+    # Use older version of the service for testing historical issues
+    build:
+      context: .
+      dockerfile: service-older.dockerfile
     depends_on:
       - secrets
       - postgres14
@@ -79,8 +81,10 @@ services:
     logging:
       driver: local
   nginx:
-    # Use older nginx version that matches the backend
-    image: "getodk/central-frontend:v2024.1.0"  # Changed from build to specific older version
+    # Build nginx locally instead of using non-existent Docker images
+    build:
+      context: .
+      dockerfile: nginx.dockerfile
     depends_on:
       - service
       - enketo
@@ -107,8 +111,8 @@ services:
       options:
         max-file: "30"
   pyxform:
-    # Use older pyxform version for consistency
-    image: 'ghcr.io/getodk/pyxform-http:v2.1.0'  # Changed to older version
+    # Use older pyxform version that might have the issue
+    image: 'ghcr.io/getodk/pyxform-http:v1.11.1'  # Much older version
     restart: always
   secrets:
     volumes:
@@ -118,8 +122,10 @@ services:
       dockerfile: secrets.dockerfile
     command: './generate-secrets.sh'
   enketo:
-    # Use older Enketo version
-    image: "getodk/central-enketo:v2024.1.0"  # Changed from build to specific older version
+    # Use older version of Enketo for testing historical issues
+    build:
+      context: .
+      dockerfile: enketo-older.dockerfile
     volumes:
       - secrets:/etc/secrets
     restart: always
@@ -137,7 +143,7 @@ services:
     extra_hosts:
       - "central.local:172.18.0.8"
   enketo_redis_main:
-    image: redis:7.0.0  # Use older Redis version for consistency
+    image: redis:6.2.14-alpine  # Older Redis version
     volumes:
       - ./files/enketo/redis-enketo-main.conf:/usr/local/etc/redis/redis.conf:ro
       - enketo_redis_main:/data
@@ -146,7 +152,7 @@ services:
       - /usr/local/etc/redis/redis.conf
     restart: always
   enketo_redis_cache:
-    image: redis:7.0.0  # Use older Redis version for consistency
+    image: redis:6.2.14-alpine  # Older Redis version
     volumes:
       - ./files/enketo/redis-enketo-cache.conf:/usr/local/etc/redis/redis.conf:ro
       - enketo_redis_cache:/data
