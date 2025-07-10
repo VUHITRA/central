@@ -53,6 +53,11 @@ prune-volumes:
 prune-all:
 	docker system prune -a --volumes -f
 
+.PHONY: prune-all-volumes
+prune-all-volumes:
+	docker volume prune -f
+	docker volume rm -f central_postgres14 central_secrets central_enketo_redis_main central_enketo_redis_cache central_enketo_redis_main_older central_enketo_redis_cache_older central_transfer 2>/dev/null || true
+
 # Backup and restore
 .PHONY: restore-backup
 restore-backup:
